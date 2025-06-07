@@ -1,0 +1,2304 @@
+-- // Top Functions
+
+getgenv().Celaris = {
+    keysus = Enum.KeyCode.RightControl,
+    seeTeamChat = false,
+    Magnets = false,
+    ShowHitbox = false,
+    MagnetType = "Blatant",
+    Range = 10,
+    HitboxMaterial = "ForceField", -- ForceField, Plastic, 
+    removeGlovesEnabled = false,
+    visualizeJumpSpot = false,
+    autoCaptainEnabled = false,
+    LandingSpotColor = Color3.fromRGB(224, 197, 255),
+    removeBallTrail = false,
+    FreezeEnabled = false,
+    FreezeType = "On Catch",
+    FreezeTime = 1.5,
+    autoCatchEnabled = false,
+    catchDelay = 0.1,
+    maxAutoCatchDistance = 10,
+    TrajectoryColor = Color3.fromRGB(224, 197, 255),
+    autoSwatEnabled = false,
+    swatDelay = 0.1,
+    maxAutoSwatDistance = 10,
+    autoQBEnabled = false,
+    resetAfterCatchEnabled = false,
+    resetAfterCatchDelay = 1,
+    antiAdminEnabled = false,
+    autoRushEnabled = false,
+    autoRushDelay = 0.5,
+    lowerGraphicsEnabled = false,
+    jumpCooldownActive = false,
+    tackleReachEnabled = false,
+    autoJumpEnabled = false,
+    jumpDelay = 0.35,
+    jumpMaxDistance = 45,
+    originalMaterials = {},
+    stadiumOriginalCFrame = nil,
+    ballTrailEnabled = false,
+    UseMagnetDelay = false,
+    MagnetDelay = 0.1,
+    HitboxColor = Color3.fromRGB(224, 197, 255),
+    HitboxTransparency = 0.5,
+    diveBoostEnabled = false,
+    diveBoostAmount = 10,
+    toggleBlockReach = false,
+    blockReachAmount = 3,
+    walkSpeedEnabled = false,
+    walkSpeedValue = 20,
+    jumpPowerEnabled = false,
+    jumpPowerValue = 50,
+    noMoveRestrictions = false,
+    Workspace = game:GetService("Workspace"),
+    rainWasInitiallyEnabled = false,
+    snowWasInitiallyEnabled = false,
+    rainSoundWasPlaying = false,
+    weather = Workspace:FindFirstChild("SkyWeather"),
+    sounds = Workspace:FindFirstChild("Sounds"),
+    scrambleWall = nil,
+    noRagdollEnabled = false,
+    lastHadFootball = false,
+    originalSize = Vector3.new(0.8500000238418579, 5, 1.5),
+    blockPartName = "BlockPart",
+    angleEnhancerEnabled = false,
+    holdTime = 1,
+    angleBoost = 10,
+    noJumpCooldownEnabled = false,
+    lastFakeJumpTime = 0,
+    jumpCooldownWait = 0.5,
+    jumpConnection = nil,
+    quickTPEnabled = false,
+    tpDistance = 3,
+    tpKey = Enum.KeyCode.F,
+    kickOn = false,
+    kickerMode = "Perfect",
+    kickType = "Normal"
+}
+
+-- // Variables \\ -- 
+
+local Celaris = getgenv().Celaris
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceID = game.PlaceId
+local JobID = game.JobId
+local AllIDs = {}
+local currentHour = os.date("!*t").hour
+local success, data = pcall(function()
+    return HttpService:JSONDecode(readfile("NotSameServers.json"))
+end)
+
+if success and type(data) == "table" then
+    AllIDs = data
+else
+    AllIDs = { currentHour }
+    writefile("NotSameServers.json", HttpService:JSONEncode(AllIDs))
+end
+
+-- // Anti Cheat Bypass \\ --
+
+local allowedPlaces = {
+    [8206123457] = true,
+    [8204899140] = true,
+    [17541256525] = true
+}
+
+if not allowedPlaces[game.PlaceId] then
+    game:GetService("Players").LocalPlayer:Kick("Wrong Game Bitch Nigga Check Supported Games")
+end
+
+-- // Anti Cheat \\ --
+
+local function BadExecutors()
+    return string.match(getexecutorname(), "Solara")
+       or string.match(getexecutorname(), "Zorara")
+       or string.match(getexecutorname(), "Wind")
+       or string.match(getexecutorname(), "Celery")
+       or string.match(getexecutorname(), "Scythex")
+       or string.match(getexecutorname(), "Nezur")
+       or string.match(getexecutorname(), "Xeno")
+end
+
+local function GoodExecutors()
+    return not BadExecutors()
+end
+
+if not LPH_OBFUSCATED then
+    function LPH_JIT(Function) return Function end
+    function LPH_JIT_MAX(Function) return Function end
+    function LPH_NO_VIRTUALIZE(Function) return Function end
+end
+
+-- Anti-Cheat Bypass
+LPH_NO_VIRTUALIZE(function()
+    if hookmetamethod and not BadExecutors() then
+        if game.PlaceId == 8204899140 or game.PlaceId == 17541256525 then
+            local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+            local ExpectedPath = LocalPlayer:GetFullName() .. ".PlayerScripts.PlayerScriptsLoader.PlayerModule.LocalScript"
+
+            if ReplicatedFirst:FindFirstChild("LocalScript") then
+                ReplicatedFirst:FindFirstChild("LocalScript"):Destroy()
+                print(ExpectedPath)
+            end
+
+            local GarbageCollection = getgc(true)
+            local Hooks = {}
+            local FunctionList = {}
+            local Handshake = nil
+
+            local Iterator = table.foreach
+
+            local function IsACItem(Function)
+                return debug.info(Function, "s") == ExpectedPath
+            end
+
+            local function ACLine(Function)
+                return debug.info(Function, "l")
+            end
+
+            Iterator(GarbageCollection, function(_, Item)
+                if type(Item) == "function" and IsACItem(Item) then
+                    table.insert(FunctionList, Item)
+                end
+            end)
+
+            Iterator(GarbageCollection, function(_, Function)
+                if type(Function) == "function" and IsACItem(Function) then
+                    local Line = ACLine(Function)
+                    if table.find({42, 51, 61}, Line) then
+                        hookfunction(Function, function() end)
+                    end
+                end
+            end)
+
+            Iterator(FunctionList, function(_, Function)
+                if type(Function) == "function" and debug.getinfo(Function).numparams == 7 then
+                    Handshake = Function
+                end
+            end)
+
+            task.wait()
+
+            Hooks.debug_info = hookfunction(debug.info, function(...)
+                local Args = {...}
+                if not checkcaller() and (Args[1] == 2) and (Args[2] == "s") then
+                    return "LocalScript"
+                end
+                return Hooks.debug_info(...)
+            end)
+
+            Hooks.__call = hookfunction(Handshake, function(...)
+                local Args = {...}
+                if Args[2] == 655 and Args[3] == 775 and Args[4] == 724 and Args[5] == 633 and Args[6] == 891 then
+                    return Hooks.__call(...)
+                elseif Args[2] == 760 and Args[3] == 760 and Args[4] == 771 and Args[5] == 665 and Args[6] == 898 then
+                    return Hooks.__call(...)
+                elseif Args[2] == 660 and Args[3] == 759 and Args[4] == 751 and Args[5] == 863 and Args[6] == 771 then
+                    return Hooks.__call(...)
+                end
+            end)
+        end
+        AC_BYPASS = true
+    end
+end)()
+
+if AC_BYPASS == true then
+    warn("Celestial has been loaded, " .. LocalPlayer.DisplayName)
+end
+
+local excname = getexecutorname()
+if excname == "Solara" or excname == "Xeno" or excname == "Swift" or excname == "Zenith" then
+    game:GetService("Players").LocalPlayer:Kick("Celestial | " .. excname .. " Doesn't work with this script well. You have been kicked.")
+end
+
+-- // Loading Screen \\ --
+loadstring(game:HttpGet"https://raw.githubusercontent.com/exlehskee/808s/refs/heads/main/NewLoading")()
+
+-- // Movement Function
+local holdingS = false
+local holdStart = 0
+local boostEndTime = 0
+
+local function applySettings()
+    local Character = LocalPlayer.Character
+    if Character and Character:FindFirstChild("Humanoid") then
+        local humanoid = Character.Humanoid
+
+        if humanoid.WalkSpeed == 0 then
+            if Celaris.walkSpeedEnabled and not Celaris.noMoveRestrictions then
+                humanoid.WalkSpeed = 0
+            elseif Celaris.walkSpeedEnabled or Celaris.noMoveRestrictions then
+                humanoid.WalkSpeed = 20
+            end
+            humanoid.JumpPower = 50
+        else
+            if Celaris.walkSpeedEnabled then
+                humanoid.WalkSpeed = Celaris.walkSpeedValue
+            else
+                humanoid.WalkSpeed = 20
+            end
+
+            if Celaris.angleEnhancerEnabled and holdingS and tick() - holdStart >= Celaris.holdTime then
+                humanoid.JumpPower = 50 + Celaris.angleBoost
+                boostEndTime = tick() + 0.25
+            elseif tick() <= boostEndTime then
+                humanoid.JumpPower = 50 + Celaris.angleBoost
+            elseif Celaris.jumpPowerEnabled then
+                humanoid.JumpPower = Celaris.jumpPowerValue
+            else
+                humanoid.JumpPower = 50
+            end
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.S then
+        holdingS = true
+        holdStart = tick()
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.S then
+        holdingS = false
+    end
+end)
+
+-- // No Jump Cooldown Function
+local function setupNoJumpCooldown()
+    if typeof(Celaris.jumpConnection) == "RBXScriptConnection" then
+        Celaris.jumpConnection:Disconnect()
+        Celaris.jumpConnection = nil
+    end
+
+    if Celaris.noJumpCooldownEnabled then
+        Celaris.jumpConnection = UserInputService.JumpRequest:Connect(function()
+            local Character = LocalPlayer.Character
+            local humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid")
+            if not humanoid then return end
+
+            task.wait()
+
+            if not Celaris.jumpCooldownActive and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                Celaris.jumpCooldownActive = true
+                Celaris.lastFakeJumpTime = tick()
+
+                task.delay(Celaris.jumpCooldownWait, function()
+                    Celaris.jumpCooldownActive = false
+                end)
+            end
+        end)
+    end
+end
+
+-- // Quick TP Function \\ --
+
+local isOnCooldown = false
+
+local function handleQuickTP()
+    if isOnCooldown then return end
+    if Celaris.quickTPEnabled then
+        local Character = LocalPlayer.Character
+        if Character and Character:FindFirstChild("HumanoidRootPart") then
+            local humanoidRootPart = Character.HumanoidRootPart
+            humanoidRootPart.CFrame = humanoidRootPart.CFrame + humanoidRootPart.CFrame.LookVector * Celaris.tpDistance
+            isOnCooldown = true
+            task.delay(0.4, function()
+                isOnCooldown = false
+            end)
+        end
+    end
+end
+
+local function onInputBegan(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Celaris.tpKey then
+        handleQuickTP()
+    end
+end
+
+local function applyBlockReach()
+	local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local blockPart = Character:FindFirstChild(Celaris.blockPartName)
+
+	if blockPart and blockPart:IsA("BasePart") then
+		if not Celaris.originalSize then
+			Celaris.originalSize = blockPart.Size
+		end
+
+		blockPart.Size = Vector3.new(
+			4.5,
+			Celaris.originalSize.Y,
+			Celaris.originalSize.Z + Celaris.blockReachAmount
+		)
+	end
+end
+
+local function resetBlockReach()
+	local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local blockPart = Character:FindFirstChild(Celaris.blockPartName)
+	if blockPart and blockPart:IsA("BasePart") then
+		blockPart.Size = Celaris.originalSize
+	end
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+	if Celaris.toggleBlockReach then
+		task.wait(1)
+		applyBlockReach()
+	end
+end)
+
+-- // Grapher & Landing Spot Marker
+
+local Grapher = {}
+
+Grapher.Segment = Instance.new("Part")
+Grapher.Segment.Anchored = true
+Grapher.Segment.Transparency = 0.3
+Grapher.Segment.Color = Celaris.TrajectoryColor
+Grapher.Segment.Material = Enum.Material.Neon
+Grapher.Segment.CanCollide = false
+Grapher.Segment.Size = Vector3.new(0.3, 0.4, 0.2)
+Grapher.Segment.Name = "Beam"
+
+Grapher.Params = RaycastParams.new()
+Grapher.Params.IgnoreWater = true
+Grapher.Params.FilterType = Enum.RaycastFilterType.Whitelist
+
+Grapher.CastStep = 3 / 60
+Grapher.LastSavedPower = 60
+Grapher.SegmentLifetime = 8
+
+function Grapher:GetCollidables()
+    local Collidables = {}
+
+    for _, part in ipairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") and part.CanCollide == true then
+            table.insert(Collidables, part)
+        end
+    end
+    return Collidables
+end
+
+function Grapher:WipeMarkers()
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj.Name == "Beam" then
+            obj:Destroy()
+        end
+    end
+end
+
+function Grapher:GetLanding(origin, velocity, target)
+    local elapsed = 0
+    local prevPos = origin
+
+    self.Params.FilterDescendantsInstances = self:GetCollidables()
+
+    while Grapher.VisualizerEnabled do
+        elapsed = elapsed + Grapher.CastStep
+        local nextPos = origin + velocity * elapsed - Vector3.new(0, 0.5 * 28 * elapsed ^ 2, 0)
+
+        local segment = self.Segment:Clone()
+        segment.Position = (prevPos + nextPos) / 2
+        segment.Size = Vector3.new(0.2, 0.2, (prevPos - nextPos).magnitude)
+        segment.CFrame = CFrame.new(prevPos, nextPos) * CFrame.new(0, 0, -segment.Size.Z / 2)
+        segment.Color = Celaris.TrajectoryColor
+
+        segment.Transparency = Grapher.Segment.Transparency
+        segment.Parent = Workspace
+
+        task.delay(Grapher.SegmentLifetime, function()
+            if segment and segment.Parent then
+                segment:Destroy()
+            end
+        end)
+
+        prevPos = nextPos
+
+        if target and (target.Parent ~= Workspace or not target:FindFirstChildOfClass("BodyForce")) then
+            self:WipeMarkers()
+            break
+        end
+
+        task.wait()
+    end
+end
+
+function Grapher:StartVisualizer()
+    Grapher.VisualizerEnabled = true
+end
+
+function Grapher:StopVisualizer()
+    Grapher.VisualizerEnabled = false
+    Grapher:WipeMarkers()
+end
+
+Workspace.ChildAdded:Connect(function(child)
+    if child.Name == "Football" and child:IsA("BasePart") then
+        local connection
+        connection = child:GetPropertyChangedSignal("Velocity"):Connect(function()
+            if Grapher.VisualizerEnabled then
+                Grapher:GetLanding(child.Position, child.Velocity, child)
+            end
+            connection:Disconnect()
+        end)
+    end
+end)
+
+local JumpSpotVisualizer = {}
+
+JumpSpotVisualizer.Params = RaycastParams.new()
+JumpSpotVisualizer.Params.IgnoreWater = true
+JumpSpotVisualizer.Params.FilterType = Enum.RaycastFilterType.Whitelist
+JumpSpotVisualizer.CastStep = 3 / 60
+
+function JumpSpotVisualizer:GetCollidables()
+    local Collidables = {}
+    for _, part in ipairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") and part.CanCollide == true then
+            table.insert(Collidables, part)
+        end
+    end
+    return Collidables
+end
+
+function JumpSpotVisualizer:GetLandingSpot(origin, velocity)
+    local elapsed = 0
+    local landed = false
+    local landingPos = origin
+
+    self.Params.FilterDescendantsInstances = self:GetCollidables()
+
+    while not landed do
+        elapsed += self.CastStep
+        local nextPos = origin + velocity * elapsed - Vector3.new(0, 0.5 * 28 * elapsed ^ 2, 0)
+        local rayResult = Workspace:Raycast(landingPos, (nextPos - landingPos), self.Params)
+
+        if rayResult then
+            landed = true
+            landingPos = rayResult.Position
+        else
+            landingPos = nextPos
+        end
+        task.wait()
+    end
+
+    local marker = Instance.new("Part")
+    marker.Anchored = true
+    marker.CanCollide = false
+    marker.Shape = Enum.PartType.Ball
+    marker.Material = Enum.Material.Neon
+    marker.Transparency = 0.4
+    marker.Color = Celaris.LandingSpotColor
+    marker.Size = Vector3.new(5, 5, 5)
+    marker.Position = landingPos + Vector3.new(0, 0.75, 0)
+    marker.Name = "LandingSpot"
+    marker.Parent = Workspace
+
+    task.delay(6, function()
+        if marker and marker.Parent then
+            marker:Destroy()
+        end
+    end)
+end
+
+Workspace.ChildAdded:Connect(function(child)
+    if child.Name == "Football" and child:IsA("BasePart") then
+        local connection
+        connection = child:GetPropertyChangedSignal("Velocity"):Connect(function()
+            if Celaris.visualizeJumpSpot then
+                JumpSpotVisualizer:GetLandingSpot(child.Position, child.Velocity)
+            end
+            connection:Disconnect()
+        end)
+    end
+end)
+
+-- // Better FPS / Graphics
+
+function handleGraphics(char, low)
+    if not char then return end
+
+    for _, part in ipairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            if low then
+                -- Store original material if not already stored
+                if not Celaris.originalMaterials[part] then
+                    Celaris.originalMaterials[part] = part.Material
+                end
+                part.Material = Enum.Material.SmoothPlastic
+            else
+                -- Revert to original material if it was stored
+                if Celaris.originalMaterials[part] then
+                    part.Material = Celaris.originalMaterials[part]
+                end
+            end
+        end
+    end
+
+    -- If turning off, clear the material cache
+    if not low then
+        Celaris.originalMaterials = {}
+    end
+end
+
+-- // Team Chat Spy
+
+local function SetupTeamChatLogger()
+    if not Celaris.seeTeamChat then return end
+
+    Players.PlayerChatted:Connect(function(player, message, channel)
+        if channel == "Team" then
+            local tag = player.Team and player.Team.Name or "No Team"
+            local name = player.Name
+            local fullMessage = "[Team] " .. name .. " (" .. tag .. "): " .. message
+
+            -- Print to output (optional)
+            print(fullMessage)
+
+            -- Log into system chat
+            game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                Text = fullMessage,
+                Color = Color3.fromRGB(224, 197, 255),
+                Font = Enum.Font.GothamBold,
+                TextSize = 18
+            })
+        end
+    end)
+end
+
+-- // Kicker Function
+
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    Character = character
+end)
+
+game:GetService("Players").LocalPlayer.PlayerGui.ChildAdded:Connect(function(child)
+    local hum = Character:FindFirstChild("Humanoid")
+    if child.Name == "KickerGui" and Character and hum and Celaris.kickOn then
+        local cursor = child:FindFirstChild("Cursor", true)
+        local firstdone = false
+        local seconddone = false
+
+        -- Mode-based Y threshold
+        local targetScale = 0.897 -- Default to Perfect
+        if Celaris.kickerMode == "Great" then
+            targetScale = 0.879
+        elseif Celaris.kickerMode == "Mediocre" then
+            targetScale = 0.865
+        end
+
+        -- Kick Type logic
+        if Celaris.kickType == "High" then
+            -- Press 'R' 3 times for High
+            for i = 1, 3 do
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.R, false, nil)
+                task.wait(0.2)  -- Slight delay between presses
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, nil)
+                task.wait(0.2)
+            end
+        elseif Celaris.kickType == "Low" then
+            -- Press 'R' 5 times for Low
+            for i = 1, 4 do
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, nil)
+                task.wait(0.2)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.F, false, nil)
+                task.wait(0.2)
+            end
+        end
+
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, nil, 0)
+
+        repeat task.wait() until cursor.Position.Y.Scale <= 0.03
+
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, nil, 0)
+        firstdone = true
+
+        if firstdone then
+            repeat task.wait() until cursor.Position.Y.Scale >= targetScale
+        end
+
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, nil, 0)
+        seconddone = true
+
+        if seconddone and firstdone then
+            
+            task.wait(0.05)
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, nil, 0)
+
+            -- Final confirmation click
+            task.wait(0.05) 
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, nil, 0)
+        end
+    end
+end)
+
+-- // Auto Rush
+
+local function findFootballHolder()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Team ~= LocalPlayer.Team then
+            if player.Character and player.Character:FindFirstChild("Football") then
+                return player
+            end
+        end
+    end
+    return nil
+end
+
+local function predictPosition(targetHrp, timeAhead)
+    local targetVelocity = targetHrp.Velocity
+    return targetHrp.Position + (targetVelocity * timeAhead)
+end
+
+local function autoRush()
+    while Celaris.autoRushEnabled do
+        local footballHolder = findFootballHolder()
+        if footballHolder then
+            local character = LocalPlayer.Character
+            local hrp = character and character:FindFirstChild("HumanoidRootPart")
+            local targetHrp = footballHolder.Character and footballHolder.Character:FindFirstChild("HumanoidRootPart")
+
+            if hrp and targetHrp then
+                local predictedPosition = predictPosition(targetHrp, Celaris.autoRushDelay)
+                if predictedPosition.Magnitude > 0 then
+                    character.Humanoid:MoveTo(predictedPosition)
+                end
+            end
+        else
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid:Move(Vector3.new(0, 0, 0), true)
+            end
+        end
+        task.wait(0.1)
+    end
+end
+
+_G.PullVector = false
+_G.PullVectorDistance = 30
+_G.PullVectorForce = 100
+
+local character = game:GetService("Players").LocalPlayer.Character
+local humanoid = character:FindFirstChild("Humanoid")
+local ballCaught = false
+local connection
+
+local function pullVectorLogic()
+    if connection then
+        connection:Disconnect()
+    end
+    connection = game:GetService("RunService").Heartbeat:Connect(function()
+        if _G.PullVector and not ballCaught then
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("Part") and v.Name == "Football" and v.Velocity.Magnitude > 2 then -- Ensure the ball is a Part and not on the ground
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        local distance = (v.Position - hrp.Position).Magnitude
+                        if distance < tonumber(_G.PullVectorDistance) and humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+                            local direction = (v.Position - hrp.Position).Unit
+                            hrp.Velocity = direction * tonumber(_G.PullVectorForce)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- // Library 
+
+local repo = "https://raw.githubusercontent.com/marylandbaby/marylandbaby/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
+
+local Options = Library.Options
+local Toggles = Library.Toggles
+
+Library.ForceCheckbox = false -- Forces AddToggle to AddCheckbox
+Library.ShowToggleFrameInKeybinds = true -- Make toggle keybinds work inside the keybinds UI (aka adds a toggle to the UI). Good for mobile users (Default value = true)
+
+local Window = Library:CreateWindow({
+
+	Title = "Celestial",
+	Footer = "Welcome! " .. LocalPlayer.DisplayName .. ", You are using v0.0.1",
+	Icon = 105198745426019,
+	NotifySide = "Right",
+	ShowCustomCursor = true,
+})
+
+local rbx = "123596491677768"
+
+local Tabs = {
+	Main = Window:AddTab("Main", "circle-user-round"),
+    Misc = Window:AddTab("Miscellaneous", "wrench"),
+	["UI Settings"] = Window:AddTab("Config", "settings")
+}
+-- // Categories
+
+-- // main
+local MagnetsTab = Tabs.Main:AddLeftGroupbox("Magnets")
+local FreezeTab = Tabs.Main:AddLeftGroupbox("Freeze Tech")
+local PlayerTab = Tabs.Main:AddLeftGroupbox("Movement")
+local DefenseTab = Tabs.Main:AddLeftGroupbox("Defense")
+local KickerTab = Tabs.Main:AddLeftGroupbox("Kicker")
+
+local HitboxTab = Tabs.Main:AddRightGroupbox("Hitbox Settings")
+local PullVectorTab = Tabs.Main:AddRightGroupbox("Pull Vector")
+local AngleTab = Tabs.Main:AddRightGroupbox("Angle Enhancer")
+local AutomaticsTab = Tabs.Main:AddRightGroupbox("Automatics")
+local VisualsTab = Tabs.Main:AddRightGroupbox("Visuals")
+
+-- // misc
+local TeleportTab = Tabs.Misc:AddLeftGroupbox("Teleports")
+local ServersideTab = Tabs.Misc:AddRightGroupbox("Serverside")
+local AntiAdminTab = Tabs.Misc:AddRightGroupbox("Anti Admin")
+
+-- // Magnet Tab (MagnetsTab)
+
+MagnetsTab:AddToggle("MagnetToggle", {
+	Text = "Ball Magnets",
+	Tooltip = "Activates a catch magnet—strength scales with your selected range.", -- Information shown when you hover over the toggle
+	DisabledTooltip = "Feature is currently not available.", -- Information shown when you hover over the toggle while it's disabled
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        getgenv().Celaris.Magnets = Value
+		Library:Notify({
+            Title = "Ball Magnets",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+MagnetsTab:AddDivider()
+
+MagnetsTab:AddSlider("MagnetSlider", {
+	Text = "Magnet Size",
+	Default = 10,
+	Min = 5,
+	Max = 20,
+	Rounding = 1,
+	Compact = false,
+
+	Callback = function(Value)
+		Celaris.Range = Value
+        for _, v in Workspace:GetChildren() do
+            if v.Name == "Football" and v:IsA("BasePart") then
+                local sphere = v:FindFirstChild("RangeSphere")
+                if sphere then
+                    sphere.Size = Vector3.new(Celaris.Range, Celaris.Range, Celaris.Range)
+                end
+            end
+        end
+	end,
+
+	Tooltip = "Adjusts the magnet strength—higher values increase your catch range.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+MagnetsTab:AddDropdown("MyDropdown", {
+	Values = { "Blatant", "Normal", "Legit" },
+	Default = 1,
+	Multi = false,
+
+	Text = "Magnet Type",
+	Tooltip = "Sets the magnet style—choose between blatant, normal, or legit based on how subtle you want it.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Searchable = false,
+
+	Callback = function(Value)
+		Celaris.MagnetType = Value
+        if Value == "Blatant" then
+            Options.MagnetSlider:SetValue(20)
+        elseif Value == "Normal" then 
+            Options.MagnetSlider:SetValue(12)
+        elseif Value == "Legit" then
+            Options.MagnetSlider:SetValue(6)
+        end
+        if Value then
+            Library:Notify({
+                Title = "Magnet Type",
+                Description = "Changed to: " .. Value,
+                Time = 3
+            })
+        end
+	end,
+
+	Disabled = false, -- Will disable the dropdown (true / false)
+	Visible = true, -- Will make the dropdown invisible (true / false)
+})
+
+FreezeTab:AddToggle("StayInBounds", {
+	Text = "Freeze Tech",
+	Tooltip = "When you jump/catch the ball, it'll freeze your character for the desired seconds.", -- Information shown when you hover over the toggle
+	DisabledTooltip = "Feature is currently not available.", -- Information shown when you hover over the toggle while it's disabled
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.FreezeEnabled = Value
+		Library:Notify({
+            Title = "Freeze Tech",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+FreezeTab:AddDivider()
+
+FreezeTab:AddSlider("FreezeTime", {
+	Text = "Freeze Time",
+	Default = 1.5,
+	Min = 0.5,
+	Max = 2,
+	Rounding = 1,
+	Compact = false,
+
+	Callback = function(Value)
+		Celaris.FreezeTime = Value
+	end,
+
+	Tooltip = "Adjusts how long you are frozen for.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+FreezeTab:AddDropdown("MyDropdown", {
+	Values = { "On Catch", "At Jump Point" },
+	Default = 1,
+	Multi = false,
+
+	Text = "Freeze Type",
+	Tooltip = "What the Freeze Tech depends on to activate it.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Searchable = false,
+
+	Callback = function(Value)
+		Celaris.FreezeType = Value
+        if Value then
+            Library:Notify({
+                Title = "Freeze Type",
+                Description = "Changed to: " .. Value,
+                Time = 3
+            })
+        end
+	end,
+
+	Disabled = false, -- Will disable the dropdown (true / false)
+	Visible = true, -- Will make the dropdown invisible (true / false)
+})
+
+HitboxTab:AddToggle("MyToggle", {
+	Text = "Show Hitbox",
+	Tooltip = "Shows your magnet hitbox to visualize the current strength and range.", -- Information shown when you hover over the toggle
+	DisabledTooltip = "Feature is currently not available.", -- Information shown when you hover over the toggle while it's disabled
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.ShowHitbox = Value
+		Library:Notify({
+            Title = "Magnet Hitbox",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+:AddColorPicker("ColorPicker1", {
+    Default = Color3.fromRGB(224, 197, 255),
+    Title = "Magnet Hitbox Color",
+    Callback = function(Value)
+        Celaris.HitboxColor = Value
+        for _, football in Workspace:GetChildren() do
+            if football.Name == "Football" and football:IsA("BasePart") then
+                local sphere = football:FindFirstChild("RangeSphere")
+                if sphere then
+                    sphere.Color = Celaris.HitboxColor
+                end
+            end
+        end
+    end,
+})
+
+
+HitboxTab:AddDivider()
+
+HitboxTab:AddSlider("MySlider", {
+	Text = "Hitbox Transparency",
+	Default = 0.5,
+	Min = 0.1,
+	Max = 0.5,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.HitboxTransparency = Value
+	end,
+	Tooltip = "Adjusts how transparent the magnet hitbox appears on your screen.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+HitboxTab:AddDropdown("MyDropdown", {
+	Values = { "ForceField", "Plastic" },
+	Default = 1,
+	Multi = false,
+
+	Text = "Hitbox Type",
+	Tooltip = "Changes the visual style of the magnet hitbox to match your preference.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Searchable = false,
+
+	Callback = function(Value)
+		Celaris.HitboxMaterial = Value
+        if Value then
+            Library:Notify({
+                Title = "Hitbox Type",
+                Description = "Changed to: " .. Value,
+                Time = 3
+            })
+        end
+        for _, football in Workspace:GetChildren() do
+            if football.Name == "Football" and football:IsA("BasePart") then
+                local sphere = football:FindFirstChild("RangeSphere")
+                if sphere then
+                    sphere.Material = Celaris.HitboxMaterial
+                end
+            end
+        end
+	end,
+	Disabled = false,
+	Visible = true,
+})
+
+
+-- // Automatics Tab
+
+AutomaticsTab:AddToggle("MyToggle", {
+	Text = "Auto Catch",
+	Tooltip = "Automatically catches the football when it's in range.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.autoCatchEnabled = Value
+		Library:Notify({
+            Title = "Auto Catch",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+AutomaticsTab:AddSlider("MySlider", {
+	Text = "Auto Catch Delay",
+	Default = 0.05,
+	Min = 0.01,
+	Max = 1,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.catchDelay = Value
+	end,
+	Tooltip = "Sets how long to wait before auto catching the ball.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+AutomaticsTab:AddSlider("MySlider", {
+	Text = "Auto Catch Distance",
+	Default = 25,
+	Min = 10,
+	Max = 50,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.maxAutoCatchDistance = Value
+	end,
+	Tooltip = "Sets how close the ball needs to be before auto catching triggers.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+AutomaticsTab:AddDivider()
+
+AutomaticsTab:AddToggle("MyToggle", {
+	Text = "Auto Swat",
+	Tooltip = "Automatically swats the ball when it's close enough to block/in range.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.autoSwatEnabled = Value
+		Library:Notify({
+            Title = "Auto Swat",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+AutomaticsTab:AddSlider("MySlider", {
+	Text = "Auto Swat Delay",
+	Default = 0.05,
+	Min = 0.01,
+	Max = 1,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.swatDelay = Value
+	end,
+	Tooltip = "Sets the wait time before the auto swat activates.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+AutomaticsTab:AddSlider("MySlider", {
+	Text = "Auto Swat Distance",
+	Default = 25,
+	Min = 10,
+	Max = 50,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.maxAutoCatchDistance = Value
+	end,
+	Tooltip = "Adjust how close the ball must be to trigger a swat.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+AutomaticsTab:AddDivider()
+
+AutomaticsTab:AddToggle("MyToggle", {
+	Text = "Perfect Auto Jump",
+	Tooltip = "Automatically times your jumps perfectly to catch the ball every time.",
+	DisabledTooltip = "Feature is currently not available.",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+	Callback = function(Value)
+        Celaris.autoJumpEnabled = Value
+		Library:Notify({
+            Title = "Perfect Auto Jump",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+AutomaticsTab:AddToggle("MyToggle", {
+	Text = "Auto Get Up",
+	Tooltip = "Automatically gets you up faster after diving or falling.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.noRagdollEnabled = Value
+		Library:Notify({
+            Title = "Auto Get Up",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+-- // Visdu
+
+AutomaticsTab:AddToggle('MyToggle', {
+    Text = 'Auto Rush',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Automatically follow the QB to get a better chance of sacking the QB.',
+    Callback = function(Value) 
+        Celaris.autoRushEnabled = Value
+        coroutine.wrap(autoRush)()
+    end
+})
+
+-- // Visuals
+
+
+VisualsTab:AddToggle("VisualizeTrajectoryToggle", {
+	Text = "Visualize Ball Trajectory",
+	Tooltip = "Displays a visual path showing where the football is headed.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        if Value then
+            Grapher:StartVisualizer()
+            Library:Notify({
+                Title = "Visualize Ball Trajectory",
+                Description = "Status: " .. Value,
+                Time = 3
+            })
+        else
+            Grapher:StopVisualizer()
+            Library:Notify({
+                Title = "Visualize Ball Trajectory",
+                Description = "Status: " .. Value,
+                Time = 3
+            })
+        end    
+	end,
+})
+
+
+:AddColorPicker("ColorPicker2", {
+    Default = Celaris.TrajectoryColor,
+    Title = "Ball Trajectory Color",
+    Callback = function(Value)
+        Celaris.TrajectoryColor = Value
+        for _, child in ipairs(Workspace:GetChildren()) do
+            if child.Name == "Beam" then
+                child.Color = Valuef
+            end
+        end
+    end,
+})
+
+VisualsTab:AddToggle("VisualizeLandingToggle", {
+	Text = "Visualize Landing Spot",
+	Tooltip = "Shows the predicted landing spot of the football.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.visualizeJumpSpot = Value
+        Library:Notify({
+            Title = "Visualize Landing Spot",
+            Description = "Status: " .. Value,
+            Time = 3
+        }) 
+	end,
+})
+
+:AddColorPicker("ColorPicker3", {
+    Default = Celaris.LandingSpotColor,
+    Title = "Landing Spot Color",
+    Callback = function(Value)
+        Celaris.LandingSpotColor = Value
+        for _, child in ipairs(Workspace:GetChildren()) do
+            if child.Name == "LandingSpot" then
+                child.Color = Value
+            end
+        end
+    end,
+})
+
+VisualsTab:AddDivider()
+
+VisualsTab:AddToggle("yesyestoggle", {
+	Text = "Better FPS",
+	Tooltip = "Removes most materials & boosts your FPS.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.lowerGraphicsEnabled = Value
+        handleGraphics(LocalPlayer.Character, Value)
+	end,
+})
+
+VisualsTab:AddToggle("yesyestoggle", {
+	Text = "Hide Stadium",
+	Tooltip = "Removes the entire stadium.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        local stadium = Workspace:FindFirstChild("Models").Stadium
+        if stadium and stadium:IsA("Model") then
+            if stadium.PrimaryPart then
+                if Value then
+                    if not Celaris.stadiumOriginalCFrame then
+                        Celaris.stadiumOriginalCFrame = stadium:GetPrimaryPartCFrame()
+                    end
+                    stadium:SetPrimaryPartCFrame(stadium.PrimaryPart.CFrame * CFrame.new(0, -500, 0))
+                else
+                    if Celaris.stadiumOriginalCFrame then
+                        stadium:SetPrimaryPartCFrame(Celaris.stadiumOriginalCFrame)
+                    end
+                end
+            end
+        end
+	end,
+})
+
+
+-- // Kicker Tab
+
+KickerTab:AddToggle("MyToggle", {
+	Text = "Auto Kick",
+	Tooltip = "Automatically kicks the ball during field goals.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.kickOn = Value
+		Library:Notify({
+            Title = "Auto Kick",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+KickerTab:AddDropdown("MyDropdown", {
+	Values = { "High", "Normal", "Low" },
+	Default = 1,
+	Multi = false,
+
+	Text = "Kicker Type",
+	Tooltip = "Choose your kick style: high, normal, or low angled kicks.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Searchable = false,
+
+	Callback = function(Value)
+		Celaris.kickType = Value
+        if Value then
+            Library:Notify({
+                Title = "Kicker Type",
+                Description = "Changed to: " .. Value,
+                Time = 3
+            })
+        end
+	end,
+
+	Disabled = false, -- Will disable the dropdown (true / false)
+	Visible = true, -- Will make the dropdown invisible (true / false)
+})
+
+KickerTab:AddDropdown("MyDropdown", {
+	Values = { "Perfect", "Great", "Mediocre" },
+	Default = 1,
+	Multi = false,
+
+	Text = "Kicker Mode",
+	Tooltip = "Select your kick accuracy mode: Perfect, Great, or Mediocre.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Searchable = false,
+
+	Callback = function(Value)
+		Celaris.kickerMode = Value
+        if Value then
+            Library:Notify({
+                Title = "Kicker Type",
+                Description = "Changed to: " .. Value,
+                Time = 3
+            })
+        end
+	end,
+
+	Disabled = false, -- Will disable the dropdown (true / false)
+	Visible = true, -- Will make the dropdown invisible (true / false)
+})
+
+-- // Visuals Tab
+
+
+
+-- // Pull Vector Tab (PullVectorTab)
+
+PullVectorTab:AddToggle("PVToggle", {
+	Text = "Pull Vector",
+	Tooltip = "Enables a pull effect that moves you toward the football—distance and force scale with your slider settings.", -- Information shown when you hover over the toggle
+	DisabledTooltip = "Feature is currently not available.", -- Information shown when you hover over the toggle while it's disabled
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        _G.PullVector = Value
+        if _G.PullVector then
+            pullVectorLogic()
+        else
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+        end
+		Library:Notify({
+            Title = "Pull Vector",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+PullVectorTab:AddDivider()
+
+PullVectorTab:AddSlider("PullVectorSlider", {
+	Text = "Pull Distance",
+	Default = 35,
+	Min = 15,
+	Max = 40,
+	Rounding = 1,
+	Compact = false,
+
+	Callback = function(Value)
+		_G.PullVectorDistance = Value
+	end,
+
+	Tooltip = "Sets the maximum distance at which the pull effect activates toward the football.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+PullVectorTab:AddSlider("PullVectorSlider", {
+	Text = "Pull Force",
+	Default = 85,
+	Min = 25,
+	Max = 100,
+	Rounding = 1,
+	Compact = false,
+
+	Callback = function(Value)
+		_G.PullVectorForce = Value
+	end,
+
+	Tooltip = "Sets the maximum distance at which the pull effect activates toward the football.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+-- // Players Tab
+
+PlayerTab:AddToggle("MyToggle", {
+	Text = "WalkSpeed",
+	Tooltip = "Toggles custom WalkSpeed—control your speed with the slider below.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.walkSpeedEnabled = Value
+		Library:Notify({
+            Title = "Walkspeed",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+        if Value == false then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 20
+        end
+	end,
+})
+
+PlayerTab:AddSlider("MySlider", {
+	Text = "WalkSpeed Amount",
+	Default = 21,
+	Min = 20,
+	Max = 23,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.walkSpeedValue = Value
+	end,
+	Tooltip = "Sets your WalkSpeed value—higher means faster movement.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+PlayerTab:AddDivider()
+
+PlayerTab:AddToggle("MyToggle", {
+	Text = "JumpPower",
+	Tooltip = "Toggles custom JumpPower—adjust your jump height with the slider.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.jumpPowerEnabled = Value
+		Library:Notify({
+            Title = "JumpPower",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+        if Value == false then
+           LocalPlayer.Character.Humanoid.JumpPower = 50 
+        end
+	end,
+})
+
+PlayerTab:AddSlider("MySlider", {
+	Text = "JumpPower Amount",
+	Default = 51,
+	Min = 50,
+	Max = 60,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.jumpPowerValue = Value
+	end,
+	Tooltip = "Sets your JumpPower—higher values let you jump farther and higher.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+PlayerTab:AddDivider()
+
+PlayerTab:AddToggle("MyToggle", {
+	Text = "No Move Restrictions",
+	Tooltip = "Lets you move freely during kickoffs, onsides, and field goals without restrictions.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.noMoveRestrictions = Value
+		Library:Notify({
+            Title = "No Move Restrictions",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+PlayerTab:AddToggle("MyToggle", {
+	Text = "No Jump Cooldown",
+	Tooltip = "Removes the delay between jumps—jump again instantly without waiting.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.noJumpCooldownEnabled = Value
+        setupNoJumpCooldown()
+		Library:Notify({
+            Title = "No Jump Cooldown",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+-- // Angle Enhancer
+AngleTab:AddToggle("MyToggle", {
+	Text = "Angle Enhancer",
+	Tooltip = "Angle Enhancer—boosts JumpPower when holding S, based on your selected hold time and boost amount.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.angleEnhancerEnabled = Value
+		Library:Notify({
+            Title = "Angle Enhancer",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+AngleTab:AddDivider()
+
+AngleTab:AddSlider("MySlider", {
+	Text = "Angle Boost",
+	Default = 2,
+	Min = 1,
+	Max = 10,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.angleBoost = Value
+	end,
+	Tooltip = "Controls the strength of your jump boost while Angle Enhancer is active.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+AngleTab:AddSlider("MySlider", {
+	Text = "Angle Hold-Time",
+	Default = 1,
+	Min = 1,
+	Max = 3,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.holdTime = Value
+	end,
+	Tooltip = "Sets how long you need to hold S before the jump boost activates.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+-- // Defense Tab
+
+DefenseTab:AddToggle("QuickTeleport", {
+	Text = "Quick TP",
+	Tooltip = "Enables quick teleporting—use the slider to set your max teleport distance.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.quickTPEnabled = Value
+		Library:Notify({
+            Title = "Quick Teleport",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+DefenseTab:AddSlider("MySlider", {
+	Text = "Quick TP Distance",
+	Default = 3,
+	Min = 1,
+	Max = 5,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.tpDistance = Value
+	end,
+	Tooltip = "Sets how far you can teleport when using Quick Teleport.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+DefenseTab:AddInput("MyTextbox", {
+	Default = "F",
+	Numeric = false,
+	Finished = true,
+	ClearTextOnFocus = true,
+
+	Text = "Quick TP KeyBind",
+	Tooltip = "Sets the key used to activate Quick Teleport.",
+
+	Placeholder = "Input Key",
+    MaxLength = 1,
+
+	Callback = function(Value)
+        local keyName = tostring(Value)
+        local keyEnum = Enum.KeyCode[keyName]
+
+        if keyEnum then
+            Celaris.tpKey = keyEnum
+            Library:Notify({
+                Title = "Quick TP Keybind",
+                Description = "New Key: " .. Value,
+                Time = 3
+            })
+        else
+            Library:Notify({
+                Title = "Error",
+                Description = "Invalid Key Input",
+                Time = 4
+            })
+        end
+	end,
+})
+
+DefenseTab:AddDivider()
+
+DefenseTab:AddToggle("MyToggle", {
+	Text = "Block Reach",
+	Tooltip = "Boosts how far you can reach to block opposing players more effectively.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.toggleBlockReach = Value
+        if Celaris.toggleBlockReach then
+            applyBlockReach()
+        else
+            LocalPlayer.Character:FindFirstChild("BlockPart").Size = Vector3.new(0.8500000238418579, 5, 1.5)
+        end
+		Library:Notify({
+            Title = "Tackle Reach",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+DefenseTab:AddSlider("MySlider", {
+	Text = "Block Reach Amount",
+	Default = 5,
+	Min = 1,
+	Max = 10,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		Celaris.blockReachAmount = Value
+        if Celaris.toggleBlockReach then
+            applyBlockReach()
+        end
+	end,
+	Tooltip = "Sets your JumpPower—higher values let you jump farther and higher.",
+	DisabledTooltip = "Disabled Feature",
+
+	Disabled = false,
+	Visible = true,
+})
+
+DefenseTab:AddDivider()
+
+DefenseTab:AddToggle("MyToggle", {
+	Text = "Tackle Reach",
+	Tooltip = "Increases how far you can reach to make a tackle.",
+	DisabledTooltip = "Feature is currently not available.",
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.tackleReachEnabled = Value
+		Library:Notify({
+            Title = "Tackle Reach",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+
+-- // Miscellaneous
+
+TeleportTab:AddButton({
+	Text = "Join Pro Servers",
+	Func = function()
+        TeleportService:Teleport(17541256525, LocalPlayer)
+	end,
+	DoubleClick = false,
+	Tooltip = "Instantly join a fresh Pro Server.",
+	DisabledTooltip = "Feature is currently not available.",
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+TeleportTab:AddButton({
+	Text = "Join Noob Servers",
+	Func = function()
+        TeleportService:Teleport(8204899140, LocalPlayer)
+	end,
+	DoubleClick = false,
+	Tooltip = "Instantly join a fresh noob server.",
+	DisabledTooltip = "Feature is currently not available.",
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+TeleportTab:AddButton({
+	Text = "Join Practice Mode",
+	Func = function()
+        TeleportService:Teleport(8206123457, LocalPlayer)
+	end,
+	DoubleClick = false,
+	Tooltip = "Instantly join a fresh practice mode server.",
+	DisabledTooltip = "Feature is currently not available.",
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+TeleportTab:AddButton({
+	Text = "Rejoin Server",
+	Func = function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId) 
+	end,
+	DoubleClick = false,
+
+	Tooltip = "Quickly reconnect to your previous game server.",
+	DisabledTooltip = "Feature is currently not available.",
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+TeleportTab:AddButton({
+	Text = "Join New Server",
+	Func = function()
+		local HttpService = game:GetService("HttpService")
+		local TeleportService = game:GetService("TeleportService")
+		local Players = game:GetService("Players")
+
+		local PlaceID = game.PlaceId
+		local JobID = game.JobId
+		local currentHour = os.date("!*t").hour
+
+		local cacheFile = "NotSameServers.json"
+		local AllIDs = {}
+
+		-- Load cache safely
+		if isfile(cacheFile) then
+			local success, data = pcall(function()
+				return HttpService:JSONDecode(readfile(cacheFile))
+			end)
+			if success and type(data) == "table" then
+				AllIDs = data
+			end
+		end
+
+		-- Reset cache if outdated
+		if tonumber(AllIDs[1]) ~= currentHour then
+			AllIDs = { currentHour }
+		end
+
+		local foundServer = false
+		local cursor = ""
+
+		while not foundServer do
+			local url = "https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Desc&limit=100"
+			if cursor ~= "" then url = url .. "&cursor=" .. cursor end
+
+			local success, response = pcall(function()
+				return HttpService:JSONDecode(game:HttpGet(url))
+			end)
+
+			if success and response and response.data then
+				cursor = response.nextPageCursor or ""
+				for _, server in ipairs(response.data) do
+					local id = server.id
+					if server.playing < (server.maxPlayers - 1) and id ~= JobID then
+						local alreadyJoined = false
+						for _, cached in ipairs(AllIDs) do
+							if id == cached then
+								alreadyJoined = true
+								break
+							end
+						end
+						if not alreadyJoined then
+							table.insert(AllIDs, id)
+							writefile(cacheFile, HttpService:JSONEncode(AllIDs))
+							TeleportService:TeleportToPlaceInstance(PlaceID, id, Players.LocalPlayer)
+							foundServer = true
+							break
+						end
+					end
+				end
+				if not cursor then break end
+			else
+				warn("Failed to fetch server list.")
+				break
+			end
+		end
+	end,
+
+	DoubleClick = false,
+	Tooltip = "Instantly join a fresh server for a new game session.",
+	DisabledTooltip = "Feature is currently not available.",
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+
+-- // Jersey Name (misc)
+
+ServersideTab:AddInput("MyTextbox", {
+	Default = 100,
+	Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = true,
+
+	Text = "Change Jersey Number",
+	Tooltip = "Change your jersey’s number to customize your look.",
+
+	Placeholder = "Set Number",
+    MaxLength = 1,
+
+	Callback = function(Value)
+        LocalPlayer.Character:FindFirstChild("Uniform").Shirt.BackNum.TextLabel.Text = Value
+        LocalPlayer.Character:FindFirstChild("Uniform").Shirt.FrontNum.TextLabel.Text = Value
+        LocalPlayer.Character:FindFirstChild("Uniform").ShoulderPads.Top.LeftNum.Text = Value
+        LocalPlayer.Character:FindFirstChild("Uniform").ShoulderPads.Top.RightNum.Text = Value 
+	end,
+})
+
+ServersideTab:AddInput("MyTextbox", {
+	Default = LocalPlayer.Name,
+	Numeric = false,
+	Finished = true,
+	ClearTextOnFocus = true,
+
+	Text = "Change Jersey Name",
+	Tooltip = "Change your jersey’s name to customize your look.",
+
+	Placeholder = "Set Number",
+    MaxLength = 1,
+
+	Callback = function(Value)
+        LocalPlayer.Character:FindFirstChild("Uniform").ShoulderPads.Back["PlayerName"].Text = Value
+	end,
+})
+
+-- // Anti Admin Tab
+
+AntiAdminTab:AddToggle("MyToggle", {
+	Text = "Enabled",
+	Tooltip = "Auto-kicks you if a game admin joins to keep you safe.", -- Information shown when you hover over the toggle
+	DisabledTooltip = "Feature is currently not available.", -- Information shown when you hover over the toggle while it's disabled
+
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
+	Callback = function(Value)
+        Celaris.antiAdminEnabled = Value
+		Library:Notify({
+            Title = "Anti Admin",
+            Description = "Status: " .. Value,
+            Time = 3
+        })
+	end,
+})
+
+-- UI Settings
+local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu")
+MenuGroup:AddToggle("KeybindMenuOpen", {
+	Default = Library.KeybindFrame.Visible,
+	Text = "Open Keybind Menu",
+	Callback = function(value)
+		Library.KeybindFrame.Visible = value
+	end,
+})
+MenuGroup:AddToggle("ShowCustomCursor", {
+	Text = "Custom Cursor",
+	Default = true,
+	Callback = function(Value)
+		Library.ShowCustomCursor = Value
+	end,
+})
+MenuGroup:AddDropdown("NotificationSide", {
+	Values = { "Left", "Right" },
+	Default = "Right",
+
+	Text = "Notification Side",
+
+	Callback = function(Value)
+		Library:SetNotifySide(Value)
+	end,
+})
+MenuGroup:AddDropdown("DPIDropdown", {
+	Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
+	Default = "100%",
+
+	Text = "DPI Scale",
+
+	Callback = function(Value)
+		Value = Value:gsub("%%", "")
+		local DPI = tonumber(Value)
+
+		Library:SetDPIScale(DPI)
+	end,
+})
+MenuGroup:AddDivider()
+MenuGroup:AddLabel("Menu bind")
+	:AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
+
+MenuGroup:AddButton("Unload", function()
+	Library:Unload()
+end)
+Library.ToggleKeybind = Options.MenuKeybind -- Allows you to have a custom keybind for the menu
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
+ThemeManager:SetFolder("MyScriptHub")
+SaveManager:SetFolder("MyScriptHub/specific-game")
+SaveManager:SetSubFolder("specific-place")
+SaveManager:BuildConfigSection(Tabs["UI Settings"])
+ThemeManager:ApplyToTab(Tabs["UI Settings"])
+SaveManager:LoadAutoloadConfig()
+
+
+UserInputService.InputBegan:Connect(onInputBegan)
+
+getgenv().FF2Admins = { 
+    [73822364] = true,
+    [73260711] = true,
+    [774257353] = true,
+    [457084784] = true,
+    [897161027] = true,
+    [715471321] = true,
+}
+
+if Celaris.antiAdminEnabled then
+    game:GetService("Players").PlayerAdded:Connect(function(player)
+        if getgenv().FF2Admins[player.UserId] then
+            game:GetService("Players").LocalPlayer:Kick("Celaris | Admin detected, you have been kicked from this experience.")
+        end
+    end)
+end
+
+-- // Source
+task.spawn(function() -- // BallMagnets
+    while true do
+        task.wait()
+        if not Celaris.Magnets then continue end
+        if not Character or not Character:FindFirstChild("CatchRight") or not Character:FindFirstChild("CatchLeft") then continue end
+        
+        for _, v in Workspace:GetChildren() do
+            if v.Name == "Football" and v:IsA("BasePart") and not v.Anchored and v.Parent == Workspace then
+                local sphere = v:FindFirstChild("RangeSphere")
+                
+                if not sphere then
+                    sphere = Instance.new("Part")
+                    sphere.Name = "RangeSphere"
+                    sphere.Shape = Enum.PartType.Ball
+                    sphere.Size = Vector3.new(Celaris.Range, Celaris.Range, Celaris.Range)
+                    sphere.Color = Celaris.HitboxColor
+                    sphere.CanCollide = false
+                    sphere.Material = Celaris.HitboxMaterial
+                    sphere.Anchored = true
+                    sphere.Position = v.Position
+                    sphere.Parent = v
+                    
+                    if Celaris.ShowHitbox then
+                        sphere.Transparency = Celaris.HitboxTransparency
+                    else
+                        sphere.Transparency = 1
+                    end
+                    task.spawn(function()
+                        while sphere.Parent == v and v.Parent == Workspace do
+                            task.wait()
+                            sphere.CFrame = v.CFrame
+                            if Celaris.ShowHitbox == true then
+                                sphere.Transparency = Celaris.HitboxTransparency
+                            else
+                                sphere.Transparency = 1
+                            end
+                        end
+                    end)
+                end
+                local distRight = (Character["CatchRight"].Position - v.Position).Magnitude
+                local distLeft = (Character["CatchLeft"].Position - v.Position).Magnitude
+
+                if distRight <= Celaris.Range or distLeft <= Celaris.Range then
+                    task.spawn(function()
+                        local delayTime = 0
+                        if Celaris.MagnetType == "Normal" then
+                            delayTime = 0.095
+                        elseif Celaris.MagnetType == "Legit" then
+                            delayTime = 0.145
+                        elseif Celaris.MagnetType == "Blatant" then
+                            delayTime = 0
+                        end
+                        if delayTime > 0 then
+                            task.wait(delayTime)
+                        end
+                        firetouchinterest(Character["CatchRight"], v, 0)
+                        firetouchinterest(Character["CatchLeft"], v, 0)
+                        firetouchinterest(Character["CatchRight"], v, 1)
+                        firetouchinterest(Character["CatchLeft"], v, 1)
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+
+Workspace.ChildRemoved:Connect(function(child)
+    if child.Name == "Football" and child:IsA("BasePart") then
+        local sphere = child:FindFirstChild("RangeSphere")
+        if sphere then
+            sphere:Destroy()
+        end
+    end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if Celaris.walkSpeedEnabled or Celaris.jumpPowerEnabled or Celaris.noMoveRestrictions or Celaris.angleEnhancerEnabled then
+        applySettings()
+    end
+end)
+
+-- // Automatics
+
+task.spawn(function()
+    while true do
+        task.wait()
+        if Celaris.autoCatchEnabled then
+            local Character = LocalPlayer.Character
+            if not Character or not Character:FindFirstChild("HumanoidRootPart") then continue end
+            local closest, closestDist = nil, math.huge
+            for _, v in Workspace:GetChildren() do
+                if v.Name == "Football" and v:IsA("BasePart") then
+                    local dist = (Character.HumanoidRootPart.Position - v.Position).Magnitude
+                    if dist < closestDist then
+                        closest = v
+                        closestDist = dist
+                    end
+                end
+            end
+            if closest and closestDist <= Celaris.maxAutoCatchDistance then
+                task.wait(Celaris.catchDelay)
+                local targetKey = Enum.KeyCode.C
+                game:GetService("VirtualInputManager"):SendKeyEvent(true, targetKey, false, game)
+                task.wait(0.1)
+                game:GetService("VirtualInputManager"):SendKeyEvent(false, targetKey, false, game)
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait()
+        if Celaris.autoSwatEnabled then
+            local Character = LocalPlayer.Character
+            if not Character or not Character:FindFirstChild("HumanoidRootPart") then continue end
+            local closest, closestDist = nil, math.huge
+            for _, v in Workspace:GetChildren() do
+                if v.Name == "Football" and v:IsA("BasePart") then
+                    local dist = (Character.HumanoidRootPart.Position - v.Position).Magnitude
+                    if dist < closestDist then
+                        closest = v
+                        closestDist = dist
+                    end
+                end
+            end
+            if closest and closestDist <= Celaris.maxAutoSwatDistance then
+                task.wait(Celaris.swatDelay)
+
+                local vim = game:GetService("VirtualInputManager")
+                vim:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+                task.wait(0.1)
+                vim:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+
+        if Celaris.resetAfterCatchEnabled then
+            local Character = LocalPlayer.Character
+            if Character and Character:FindFirstChild("Football") and not Celaris.lastHadFootball then
+                Celaris.lastHadFootball = true
+                task.wait(Celaris.resetAfterCatchDelay)
+
+                if Character:FindFirstChild("Humanoid") then
+                    Character.Humanoid.Health = 0
+                end
+            elseif Character and not Character:FindFirstChild("Football") then
+                Celaris.lastHadFootball = false
+            end
+        end
+    end
+end)
+
+
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+
+        if Celaris.noRagdollEnabled then
+            local character = game:GetService("Players").LocalPlayer.Character
+            local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+
+            if humanoid and humanoid.PlatformStand then
+                task.wait(0.6)
+                if Celaris.noRagdollEnabled and humanoid.PlatformStand then
+                    humanoid.PlatformStand = false
+                end
+            end
+        end
+    end
+end)
+
+-- // Tackle Reach
+
+task.spawn(function()
+    while true do
+        task.wait()
+
+        if not Celaris.tackleReachEnabled then continue end
+        local Player = game:GetService("Players").LocalPlayer
+        local myChar = Player.Character
+        if not myChar or not myChar:FindFirstChild("Torso") then continue end
+
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= Player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Football") then
+                local theirTorso = otherPlayer.Character:FindFirstChild("Torso")
+                if theirTorso then
+                    firetouchinterest(myChar.Torso, theirTorso, 0)
+                    firetouchinterest(myChar.Torso, theirTorso, 1)
+                end
+            end
+        end
+    end
+end)
+
+local freezeDebounce = false
+local lastFreezeTime = 0
+local lastBall = nil
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local Character = player.Character or player.CharacterAdded:Wait()
+
+task.spawn(function()
+	RunService.Heartbeat:Connect(function()
+		if not Celaris.FreezeEnabled or not Celaris.FreezeType then return end
+		if freezeDebounce then return end
+
+		local humanoid = Character:FindFirstChildOfClass("Humanoid")
+		local hrp = Character:FindFirstChild("HumanoidRootPart")
+		if not humanoid or not hrp then return end
+
+		local ball = player.Backpack:FindFirstChild("Football") or Character:FindFirstChild("Football")
+		if not ball then return end
+
+		if ball == lastBall then return end
+
+		if Celaris.FreezeType == "On Catch" then
+			freezeDebounce = true
+			lastBall = ball
+
+			hrp.Anchored = true
+			task.delay(Celaris.FreezeTime, function()
+				if hrp and hrp.Parent then
+					hrp.Anchored = false
+				end
+				freezeDebounce = false
+			end)
+
+		elseif Celaris.FreezeType == "At Jump Point" and humanoid.PlatformStand then
+			freezeDebounce = true
+			lastBall = ball
+
+			hrp.Anchored = true
+			task.delay(Celaris.FreezeTime, function()
+				if hrp and hrp.Parent then
+					hrp.Anchored = false
+				end
+				freezeDebounce = false
+			end)
+		end
+	end)
+end)
